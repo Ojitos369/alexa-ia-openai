@@ -1,25 +1,31 @@
+import os
 import openai
 import logging
+from dotenv import load_dotenv
 from ask_sdk_core.skill_builder import SkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractExceptionHandler
 from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import Response
 from ask_sdk_core.utils import is_request_type, is_intent_name
 
+load_dotenv()
 # Configurar logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Clave de OpenAI
-openai.api_key = "Clave_openai"  # Reemplaza con tu clave real
+OPEN_AI_API = os.getenv("OPEN_AI_API")
+print("OPEN_AI_API", OPEN_AI_API)
+openai.api_key = OPEN_AI_API
 
-def obtener_respuesta_openai(messages: list) -> str:
+def obtener_respuesta_openai(messages: list, model="basico") -> str:
     """
     Llama a la API de OpenAI usando ChatCompletion con todo el historial de mensajes.
     """
     try:
         respuesta = openai.ChatCompletion.create(
-            model="gpt-4o-mini",  # Cambia el modelo si es necesario (ej: "gpt-3.5-turbo")
+            model="gpt-4o" if model == "avanzado" else "gpt-4o-mini",
+            # model="asst_2IHKpjntcemAC95p7ZfbUgyl",
             messages=messages,
             max_tokens=1500,
             temperature=0.7
@@ -77,11 +83,15 @@ class OpenAIIntentHandler(AbstractRequestHandler):
             if "messages" not in session_attributes:
                 session_attributes["messages"] = []
 
+            model = "basico"
+            if pregunta_usuario.startswith("avanzado"):
+                model = "avanzado"
+                pregunta_usuario = pregunta_usuario[8:]
             # Agregar el mensaje del usuario al historial
             session_attributes["messages"].append({"role": "user", "content": pregunta_usuario})
 
             # Obtener respuesta de OpenAI con todo el historial
-            respuesta_openai = obtener_respuesta_openai(session_attributes["messages"])
+            respuesta_openai = obtener_respuesta_openai(session_attributes["messages"], model)
 
             # Agregar el mensaje del asistente al historial
             session_attributes["messages"].append({"role": "assistant", "content": respuesta_openai})
