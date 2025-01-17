@@ -1,1 +1,6 @@
 *.env
+*/src/.vlaid_hist.json
+*/src/functions.json
+*/src/functions.py
+*/src/logs.txt
+*__pycache__/

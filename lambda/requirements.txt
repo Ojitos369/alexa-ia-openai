@@ -4,3 +4,4 @@ ask-sdk-runtime==1.19.0
 openai==0.28.0
 python-dotenv==1.0.1
 urllib3<2.0
+requests<3.0
